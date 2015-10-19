@@ -12,6 +12,7 @@ import javax.xml.bind.JAXB;
 
 import gl8080.filepost.domain.DestinationFolder;
 import gl8080.filepost.domain.DestinationFolderRepository;
+import gl8080.filepost.infrastructure.store.DestinationFolderTag;
 import gl8080.filepost.infrastructure.store.StoreXmlRoot;
 
 public class DestinationFolderRepositoryImpl implements DestinationFolderRepository {
@@ -26,11 +27,43 @@ public class DestinationFolderRepositoryImpl implements DestinationFolderReposit
         }
         
         try {
-            StoreXmlRoot hoge = JAXB.unmarshal(Files.newBufferedReader(this.file.toPath(), StandardCharsets.UTF_8), StoreXmlRoot.class);
+            StoreXmlRoot hoge = this.loadConfig();
             
             return hoge.getDestinationFolders().stream().map(tag -> {
                 return new DestinationFolder(new File(tag.getPath()), tag.getName());
             }).collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public void registerFolder(DestinationFolder folder) {
+        try {
+            StoreXmlRoot root = this.loadConfig();
+            
+            DestinationFolderTag tag = new DestinationFolderTag();
+            tag.setName(folder.getName());
+            tag.setPath(folder.getDestPath());
+            
+            root.addFolder(tag);
+
+            JAXB.marshal(root, this.file);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private StoreXmlRoot loadConfig() throws IOException {
+        StoreXmlRoot root = JAXB.unmarshal(Files.newBufferedReader(this.file.toPath(), StandardCharsets.UTF_8), StoreXmlRoot.class);
+        return root;
+    }
+
+    @Override
+    public boolean existsSameFolder(DestinationFolder folder) {
+        try {
+            StoreXmlRoot root = this.loadConfig();
+            return root.hasFolder(folder);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import gl8080.filepost.domain.DestinationFolder;
+
 @XmlRootElement(name="filepost")
 public class StoreXmlRoot {
     
@@ -26,5 +28,12 @@ public class StoreXmlRoot {
     public String toString() {
         return "StoreXmlRoot [destinationFolders=" + destinationFolders + "]";
     }
+
+    public void addFolder(DestinationFolderTag tag) {
+        this.destinationFolders.add(tag);
+    }
     
+    public boolean hasFolder(DestinationFolder folder) {
+        return this.destinationFolders.stream().anyMatch(f -> f.getPath().equals(folder.getDestPath()));
+    }
 }
