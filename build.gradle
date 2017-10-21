@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
 
 repositories {
     mavenCentral()
@@ -15,6 +14,8 @@ dependencies {
     testCompile 'de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1'
 }
 
-eclipse {
-    project.name = 'filepost'
+jar {
+    manifest {
+        attributes('Main-Class': 'gl8080.filepost.Main')
+    }
 }

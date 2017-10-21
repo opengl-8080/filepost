@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import gl8080.filepost.domain.DestinationFolder;
 import gl8080.filepost.domain.DestinationFolderRepository;
@@ -105,13 +106,14 @@ public class MainController implements Initializable {
     @FXML
     public void refreshDestFolderListView() {
         ObservableList<ListItem> list = FXCollections.observableArrayList();
-        
+
+        String filterText = this.filterTextField.getText().toLowerCase();
+        String[] filterTexts = filterText.split("[ 　]");
+
         this.destinationFolders
             .stream()
-            .filter(f -> f.getName().contains(this.filterTextField.getText()))
-            .forEach(f -> {
-                list.add(new ListItem(f));
-            });
+            .filter(f -> Stream.of(filterTexts).allMatch(text -> f.getName().toLowerCase().contains(text)))
+            .forEach(f -> list.add(new ListItem(f)));
         
         this.destDirectoryListView.setItems(list.sorted());
     }
