@@ -1,22 +1,17 @@
 package gl8080.filepost.view;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Stream;
-
+import gl8080.filepost.Main;
 import gl8080.filepost.domain.DestinationFolder;
 import gl8080.filepost.domain.DestinationFolderRepository;
+import gl8080.filepost.domain.DuplicationStrategy;
 import gl8080.filepost.infrastructure.DestinationFolderRepositoryImpl;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -32,6 +27,20 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 public class MainController implements Initializable {
     
@@ -79,10 +88,11 @@ public class MainController implements Initializable {
         confirm.setOnCloseRequest(e -> {
             if (confirm.getResult() == ButtonType.OK) {
                 try {
-                    item.folder.moveInto(this.targetFiles);
+                    int movedCount = item.folder.moveInto(this.targetFiles, this::openDuplicationWindow);
+                    
                     Alert complete = new Alert(AlertType.INFORMATION);
                     complete.setTitle("移動完了");
-                    complete.setHeaderText(this.targetFiles.size() + " 件のファイルを移動しました。");
+                    complete.setHeaderText(movedCount + " 件のファイルを移動しました。");
                     complete.setContentText("移動先：" + item.folder.getDestPath());
                     complete.show();
                     this.clear();
@@ -101,6 +111,31 @@ public class MainController implements Initializable {
             }
         });
         confirm.show();
+    }
+    
+    private Optional<DuplicationStrategy> openDuplicationWindow(File srcFile, List<File> duplications) {
+        try {
+            FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/duplication.fxml"));
+            Parent root = loader.load();
+            
+            DuplicationController controller = loader.getController();
+            
+            Scene scene = new Scene(root);
+
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("重複ファイル");
+            stage.setMaximized(true);
+            
+            controller.init(stage, srcFile, duplications);
+
+            stage.showAndWait();
+            
+            return controller.getDuplicationStrategy();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
     
     @FXML
