@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,20 +58,9 @@ public class DestinationFolder {
         });
         return movedCount.get();
     }
-    
-    private List<File> findDuplications() {
-        List<File> duplications = new ArrayList<>();
-        File[] files1 = this.destDir.listFiles();
-        if (files1 != null) {
-            for (int i=0; i<files1.length && i<3; i++) {
-                duplications.add(files1[i]);
-            }
-        }
-        return duplications;
-    }
 
     private DuplicationStrategy decideStrategy(File src, BiFunction<File, List<File>, Optional<DuplicationStrategy>> duplicationListener) {
-        List<File> duplications = this.findDuplications();
+        List<File> duplications = new DuplicationImageFinder(this.destDir, this.name, src).find();
 
         if (!duplications.isEmpty()) {
             return duplicationListener.apply(src, duplications).orElse(DuplicationStrategy.SKIP);
