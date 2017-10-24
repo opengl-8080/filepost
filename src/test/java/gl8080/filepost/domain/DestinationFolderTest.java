@@ -59,7 +59,7 @@ public class DestinationFolderTest {
         List<File> files = Arrays.asList(file1, file2, file3);
         
         // exercise
-        dest.moveInto(files);
+//        dest.moveInto(files);
         
         // verify
         boolean deleted = files.stream().allMatch(f -> !f.exists());

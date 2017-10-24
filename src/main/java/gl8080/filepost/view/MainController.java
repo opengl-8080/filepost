@@ -1,10 +1,11 @@
 package gl8080.filepost.view;
 
-import gl8080.filepost.Main;
 import gl8080.filepost.domain.DestinationFolder;
 import gl8080.filepost.domain.DestinationFolderRepository;
-import gl8080.filepost.domain.DuplicationStrategy;
+import gl8080.filepost.domain.NoIndexedImages;
+import gl8080.filepost.domain.SimilarImageStrategy;
 import gl8080.filepost.infrastructure.DestinationFolderRepositoryImpl;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -88,6 +89,32 @@ public class MainController implements Initializable {
         confirm.setOnCloseRequest(e -> {
             if (confirm.getResult() == ButtonType.OK) {
                 try {
+
+                    NoIndexedImages noIndexedImages = item.folder.findNoIndexedImages();
+                    if (noIndexedImages.isNotEmpty()) {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/indexing-dialog.fxml"));
+                            Parent root = loader.load();
+
+                            IndexingController controller = loader.getController();
+                            controller.setNoIndexedImages(noIndexedImages);
+
+                            Scene scene = new Scene(root);
+
+                            Stage stage = new Stage();
+                            stage.setScene(scene);
+                            stage.initModality(Modality.APPLICATION_MODAL);
+                            stage.setTitle("インデックス作成");
+                            stage.setResizable(false);
+                            stage.setOnShown(event -> controller.start());
+                            controller.onFinished(() -> Platform.runLater(stage::close));
+                            
+                            stage.showAndWait();
+                        } catch (IOException ew) {
+                            throw new UncheckedIOException(ew);
+                        }
+                    }
+
                     int movedCount = item.folder.moveInto(this.targetFiles, this::openDuplicationWindow);
                     
                     Alert complete = new Alert(AlertType.INFORMATION);
@@ -113,12 +140,12 @@ public class MainController implements Initializable {
         confirm.show();
     }
     
-    private Optional<DuplicationStrategy> openDuplicationWindow(File srcFile, List<File> duplications) {
+    private Optional<SimilarImageStrategy> openDuplicationWindow(File srcFile, List<File> duplications) {
         try {
             FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/duplication.fxml"));
             Parent root = loader.load();
             
-            DuplicationController controller = loader.getController();
+            SimilarImageController controller = loader.getController();
             
             Scene scene = new Scene(root);
 
@@ -132,7 +159,7 @@ public class MainController implements Initializable {
 
             stage.showAndWait();
             
-            return controller.getDuplicationStrategy();
+            return controller.getSimilarImageStrategy();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -1,6 +1,6 @@
 package gl8080.filepost.view;
 
-import gl8080.filepost.domain.DuplicationStrategy;
+import gl8080.filepost.domain.SimilarImageStrategy;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,14 +13,13 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Optional;
 
-public class DuplicationController {
+public class SimilarImageController {
     
     private Stage stage;
     
-    private File file;
-    private List<File> duplications;
-    private int duplicationImageIndex = 0;
-    private DuplicationStrategy duplicationStrategy;
+    private List<File> similarImages;
+    private int similarImagesIndex = 0;
+    private SimilarImageStrategy similarImageStrategy;
     
     @FXML
     private ImageView srcImageView;
@@ -31,25 +30,24 @@ public class DuplicationController {
     @FXML
     private Label srcImageFileSize;
     @FXML
-    private ImageView duplicationImageView;
+    private ImageView similarImageView;
     @FXML
-    private Label duplicationImageFilePath;
+    private Label similarImageFilePath;
     @FXML
-    private Label duplicationImageSize;
+    private Label similarImageSize;
     @FXML
-    private Label duplicationImageFileSize;
+    private Label similarImageFileSize;
     @FXML
-    private Button nextDuplicationButton;
+    private Button nextImageButton;
     @FXML
-    private Button prevDuplicationButton;
+    private Button prevImageButton;
     
-    void init(Stage stage, File file, List<File> duplications) {
+    void init(Stage stage, File file, List<File> similarImages) {
         this.stage = stage;
-        this.file = file;
-        this.duplications = duplications;
+        this.similarImages = similarImages;
         
-        this.setImage(this.file, this.srcImageView, this.srcImageFilePath, this.srcImageSize, this.srcImageFileSize);
-        this.setDuplicationImage();
+        this.setImage(file, this.srcImageView, this.srcImageFilePath, this.srcImageSize, this.srcImageFileSize);
+        this.setSimilarImage();
     }
     
     private void setImage(File imageFile, ImageView imageView, Label filePathLabel, Label imageSizeLabel, Label fileSizeLabel) {
@@ -75,40 +73,40 @@ public class DuplicationController {
     }
     
     @FXML
-    public void onClickPrevDuplicationButton() {
-        this.duplicationImageIndex--;
-        this.setDuplicationImage();
+    public void onClickPrevImageButton() {
+        this.similarImagesIndex--;
+        this.setSimilarImage();
     }
     
     @FXML
-    public void onClickNextDuplicationButton() {
-        this.duplicationImageIndex++;
-        this.setDuplicationImage();
+    public void onClickNextImageButton() {
+        this.similarImagesIndex++;
+        this.setSimilarImage();
     }
     
-    private void setDuplicationImage() {
-        this.setImage(this.duplications.get(this.duplicationImageIndex), this.duplicationImageView, this.duplicationImageFilePath, this.duplicationImageSize, this.duplicationImageFileSize);
+    private void setSimilarImage() {
+        this.setImage(this.similarImages.get(this.similarImagesIndex), this.similarImageView, this.similarImageFilePath, this.similarImageSize, this.similarImageFileSize);
         this.controlButtonDisable();
     }
     
     private void controlButtonDisable() {
-        this.prevDuplicationButton.setDisable(this.duplicationImageIndex <= 0);
-        this.nextDuplicationButton.setDisable(this.duplications.size() - 1 <= this.duplicationImageIndex);
+        this.prevImageButton.setDisable(this.similarImagesIndex <= 0);
+        this.nextImageButton.setDisable(this.similarImages.size() - 1 <= this.similarImagesIndex);
     }
     
     @FXML
     public void onClickMoveButton() {
-        this.duplicationStrategy = DuplicationStrategy.MOVE;
+        this.similarImageStrategy = SimilarImageStrategy.MOVE;
         this.stage.close();
     }
     
     @FXML
     public void onClickSkipButton() {
-        this.duplicationStrategy = DuplicationStrategy.SKIP;
+        this.similarImageStrategy = SimilarImageStrategy.SKIP;
         this.stage.close();
     }
     
-    Optional<DuplicationStrategy> getDuplicationStrategy() {
-        return Optional.ofNullable(this.duplicationStrategy);
+    Optional<SimilarImageStrategy> getSimilarImageStrategy() {
+        return Optional.ofNullable(this.similarImageStrategy);
     }
 }

@@ -8,7 +8,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="820.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gl8080.filepost.view.DuplicationController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="820.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gl8080.filepost.view.SimilarImageController">
    <center>
       <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
@@ -70,12 +70,12 @@
                      <children>
                         <AnchorPane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <Button fx:id="prevDuplicationButton" mnemonicParsing="false" onAction="#onClickPrevDuplicationButton" text="前へ" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <Button fx:id="prevImageButton" mnemonicParsing="false" onAction="#onClickPrevImageButton" text="前へ" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
                         </AnchorPane>
                         <AnchorPane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <Button fx:id="nextDuplicationButton" mnemonicParsing="false" onAction="#onClickNextDuplicationButton" text="次へ" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <Button fx:id="nextImageButton" mnemonicParsing="false" onAction="#onClickNextImageButton" text="次へ" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
                         </AnchorPane>
                      </children>
@@ -108,16 +108,16 @@
                               <Insets left="5.0" />
                            </padding>
                         </Label>
-                        <Label fx:id="duplicationImageFilePath" GridPane.columnIndex="1" />
-                        <Label fx:id="duplicationImageSize" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label fx:id="duplicationImageFileSize" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label fx:id="similarImageFilePath" GridPane.columnIndex="1" />
+                        <Label fx:id="similarImageSize" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label fx:id="similarImageFileSize" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                      </children>
                   </GridPane>
                </bottom>
                <center>
                   <ScrollPane pannable="true">
                      <content>
-                        <ImageView fx:id="duplicationImageView" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fx:id="similarImageView" pickOnBounds="true" preserveRatio="true">
                            <cursor>
                               <Cursor fx:constant="MOVE" />
                            </cursor>
