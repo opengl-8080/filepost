@@ -16,12 +16,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -114,7 +113,7 @@ public class DestinationFolder {
         return IMAGE_FILE_EXTENSIONS.stream().anyMatch(name::endsWith);
     }
 
-    public int moveInto(List<File> files, BiFunction<File, List<File>, Optional<SimilarImageStrategy>> similarImageListener) {
+    public int moveInto(LinkedHashSet<File> files, BiFunction<File, List<File>, Optional<SimilarImageStrategy>> similarImageListener) {
         AtomicInteger movedCount = new AtomicInteger(0);
         
         files.forEach(src -> {
@@ -138,7 +137,11 @@ public class DestinationFolder {
         return movedCount.get();
     }
 
-    private SimilarImageStrategy decideStrategy(File src, BiFunction<File, List<File>, Optional<SimilarImageStrategy>> similarImageListener) {
+    private SimilarImageStrategy decideStrategy(File src, BiFunction<File, List<File>, Optional<SimilarImageStrategy>> similarImageListener) throws IOException {
+        if (this.doesNotHaveImageFiles()) {
+            return SimilarImageStrategy.MOVE;
+        }
+
         List<File> similarImages = new SimilarImageFinder().findSimilarImages(src, this.name);
 
         if (!similarImages.isEmpty()) {
@@ -146,5 +149,9 @@ public class DestinationFolder {
         }
         
         return SimilarImageStrategy.MOVE;
+    }
+    
+    private boolean doesNotHaveImageFiles() throws IOException {
+        return Files.list(this.destDir.toPath()).filter(this::isImageFile).count() == 0;
     }
 }

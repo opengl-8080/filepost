@@ -37,7 +37,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -54,7 +54,7 @@ public class MainController implements Initializable {
     @FXML
     private ListView<ListItem> destDirectoryListView;
     
-    private List<File> targetFiles;
+    private LinkedHashSet<File> targetFiles;
     private List<DestinationFolder> destinationFolders;
     
     private DestinationFolderRepository repository = new DestinationFolderRepositoryImpl();
@@ -203,9 +203,13 @@ public class MainController implements Initializable {
     public void onDragDroppedFile(DragEvent event) {
         Dragboard dragboard = event.getDragboard();
         
-        this.targetFiles = dragboard.getFiles();
+        if (this.targetFiles.isEmpty()) {
+            this.targetFiles = new LinkedHashSet<>(dragboard.getFiles());
+        } else {
+            this.targetFiles.addAll(dragboard.getFiles());
+        }
+        
         this.targetFilesLabel.setText(this.targetFiles.size() + " 件選択されています");
-        this.targetFilesLabel.setDisable(true);
         this.filterTextField.setDisable(false);
         this.filterTextField.requestFocus();
         
@@ -215,9 +219,8 @@ public class MainController implements Initializable {
     
     @FXML
     public void clear() {
-        this.targetFiles = new ArrayList<>();
+        this.targetFiles = new LinkedHashSet<>();
         this.targetFilesLabel.setText("ここにファイルをドロップ");
-        this.targetFilesLabel.setDisable(false);
         this.filterTextField.setDisable(true);
     }
     
@@ -284,7 +287,7 @@ public class MainController implements Initializable {
     public static class ListItem {
         private final DestinationFolder folder;
         
-        public ListItem(DestinationFolder folder) {
+        private ListItem(DestinationFolder folder) {
             this.folder = folder;
         }
 
