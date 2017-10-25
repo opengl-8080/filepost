@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="820.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gl8080.filepost.view.SimilarImageController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="820.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8.0.151" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gl8080.filepost.view.SimilarImageController">
    <center>
       <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
@@ -32,20 +40,41 @@
                            <padding>
                               <Insets left="5.0" />
                            </padding>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
                         </Label>
                         <Label text="画像サイズ" GridPane.rowIndex="1">
                            <padding>
                               <Insets left="5.0" />
                            </padding>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
                         </Label>
                         <Label text="ファイルサイズ" GridPane.rowIndex="2">
                            <padding>
                               <Insets left="5.0" />
                            </padding>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
                         </Label>
-                        <Label fx:id="srcImageFilePath" GridPane.columnIndex="1" />
-                        <Label fx:id="srcImageSize" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label fx:id="srcImageFileSize" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label fx:id="srcImageFilePath" GridPane.columnIndex="1">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="srcImageSize" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="srcImageFileSize" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
                      </children>
                   </GridPane>
                </bottom>
@@ -97,20 +126,38 @@
                            <padding>
                               <Insets left="5.0" />
                            </padding>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
                         </Label>
                         <Label text="画像サイズ" GridPane.rowIndex="1">
                            <padding>
                               <Insets left="5.0" />
                            </padding>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
                         </Label>
                         <Label text="ファイルサイズ" GridPane.rowIndex="2">
                            <padding>
                               <Insets left="5.0" />
                            </padding>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
                         </Label>
-                        <Label fx:id="similarImageFilePath" GridPane.columnIndex="1" />
-                        <Label fx:id="similarImageSize" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label fx:id="similarImageFileSize" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label fx:id="similarImageFilePath" GridPane.columnIndex="1">
+                           <font>
+                              <Font size="18.0" />
+                           </font></Label>
+                        <Label fx:id="similarImageSize" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font size="18.0" />
+                           </font></Label>
+                        <Label fx:id="similarImageFileSize" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <font>
+                              <Font size="18.0" />
+                           </font></Label>
                      </children>
                   </GridPane>
                </bottom>
@@ -134,12 +181,27 @@
          <children>
             <AnchorPane HBox.hgrow="ALWAYS">
                <children>
-                  <Button mnemonicParsing="false" onAction="#onClickSkipButton" text="スキップ" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <Button mnemonicParsing="false" onAction="#onClickSkipButton" text="スキップ" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font size="15.0" />
+                     </font></Button>
                </children>
             </AnchorPane>
             <AnchorPane HBox.hgrow="ALWAYS">
                <children>
-                  <Button mnemonicParsing="false" onAction="#onClickMoveButton" text="移動する" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <Button mnemonicParsing="false" onAction="#onClickMoveButton" text="移動する" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font size="15.0" />
+                     </font></Button>
+               </children>
+            </AnchorPane>
+            <AnchorPane HBox.hgrow="ALWAYS">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#onClickRemoveButton" text="削除する" textFill="#d70000" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                  </Button>
                </children>
             </AnchorPane>
          </children>

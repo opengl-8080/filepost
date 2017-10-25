@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -121,8 +123,11 @@ public class DestinationFolder {
                 
                 if (strategy == SimilarImageStrategy.SKIP) {
                     return;
+                } else if (strategy == SimilarImageStrategy.REMOVE) {
+                    Files.delete(src.toPath());
+                    return;
                 }
-
+                
                 File dest = new File(this.destDir, src.getName());
                 Files.move(src.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
                 movedCount.incrementAndGet();

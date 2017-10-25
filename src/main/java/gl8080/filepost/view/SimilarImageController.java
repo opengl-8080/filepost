@@ -2,7 +2,9 @@ package gl8080.filepost.view;
 
 import gl8080.filepost.domain.SimilarImageStrategy;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -104,6 +106,24 @@ public class SimilarImageController {
     public void onClickSkipButton() {
         this.similarImageStrategy = SimilarImageStrategy.SKIP;
         this.stage.close();
+    }
+    
+    @FXML
+    public void onClickRemoveButton() {
+        Alert alert = new Alert(Alert.AlertType.WARNING, "削除します、よろしいですか？", ButtonType.CANCEL, ButtonType.OK);
+        alert.setTitle("ファイル削除");
+        
+        Button cancelButton = (Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.setDefaultButton(false);
+        Button okButton = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.setDefaultButton(true);
+        
+        ButtonType buttonType = alert.showAndWait().orElse(ButtonType.NO);
+        
+        if (ButtonType.OK.equals(buttonType)) {
+            this.similarImageStrategy = SimilarImageStrategy.REMOVE;
+            this.stage.close();
+        }
     }
     
     Optional<SimilarImageStrategy> getSimilarImageStrategy() {
