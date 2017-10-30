@@ -86,58 +86,57 @@ public class MainController implements Initializable {
         Alert confirm = new Alert(AlertType.CONFIRMATION);
         confirm.setTitle("ファイル移動");
         confirm.setHeaderText(item.folder.getDestPath() + " に移動します。");
-        confirm.setOnCloseRequest(e -> {
-            if (confirm.getResult() == ButtonType.OK) {
-                try {
+        confirm.setOnCloseRequest(event -> {
+            if (confirm.getResult() != ButtonType.OK) {
+                return;
+            }
 
-                    NoIndexedImages noIndexedImages = item.folder.findNoIndexedImages();
-                    if (noIndexedImages.isNotEmpty()) {
-                        try {
-                            FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/indexing-dialog.fxml"));
-                            Parent root = loader.load();
+            DestinationFolder destinationFolder = item.folder;
 
-                            IndexingController controller = loader.getController();
-                            controller.setNoIndexedImages(noIndexedImages);
-
-                            Scene scene = new Scene(root);
-
-                            Stage stage = new Stage();
-                            stage.setScene(scene);
-                            stage.initModality(Modality.APPLICATION_MODAL);
-                            stage.setTitle("インデックス作成");
-                            stage.setResizable(false);
-                            stage.setOnShown(event -> controller.start());
-                            controller.onFinished(() -> Platform.runLater(stage::close));
-                            
-                            stage.showAndWait();
-                        } catch (IOException ew) {
-                            throw new UncheckedIOException(ew);
-                        }
-                    }
-
-                    int movedCount = item.folder.moveInto(this.targetFiles, this::openDuplicationWindow);
-                    
-                    Alert complete = new Alert(AlertType.INFORMATION);
-                    complete.setTitle("移動完了");
-                    complete.setHeaderText(movedCount + " 件のファイルを移動しました。");
-                    complete.setContentText("移動先：" + item.folder.getDestPath());
-                    complete.show();
-                    this.clear();
-                } catch (UncheckedIOException ex) {
-                    Alert error = new Alert(AlertType.ERROR);
-                    
-                    StringWriter sw = new StringWriter();
-                    PrintWriter pw = new PrintWriter(sw);
-                    ex.printStackTrace(pw);
-                    TextArea textArea = new TextArea(sw.toString());
-                    
-                    error.getDialogPane().setExpandableContent(textArea);
-                    error.setContentText("ファイル保存中にエラーが発生しました。");
-                    error.show();
+            try {
+                NoIndexedImages noIndexedImages = destinationFolder.findNoIndexedImages();
+                if (noIndexedImages.isNotEmpty()) {
+                    this.showIndexingDialog(noIndexedImages);
                 }
+
+                int movedCount = destinationFolder.moveInto(this.targetFiles, this::openDuplicationWindow);
+                
+                this.showCompletedDialog(movedCount, destinationFolder);
+                
+                this.clear();
+            } catch (UncheckedIOException | IOException e) {
+                this.showFailedMessageToSaveImage(e);
             }
         });
         confirm.show();
+    }
+    
+    private void showCompletedDialog(int movedCount, DestinationFolder destinationFolder) {
+        Alert complete = new Alert(AlertType.INFORMATION);
+        complete.setTitle("移動完了");
+        complete.setHeaderText(movedCount + " 件のファイルを移動しました。");
+        complete.setContentText("移動先：" + destinationFolder.getDestPath());
+        complete.show();
+    }
+    
+    private void showIndexingDialog(NoIndexedImages noIndexedImages) throws IOException {
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/indexing-dialog.fxml"));
+        Parent root = loader.load();
+
+        IndexingController controller = loader.getController();
+        controller.setNoIndexedImages(noIndexedImages);
+
+        Scene scene = new Scene(root);
+
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("インデックス作成");
+        stage.setResizable(false);
+        stage.setOnShown(event -> controller.start());
+        controller.onFinished(() -> Platform.runLater(stage::close));
+
+        stage.showAndWait();
     }
     
     private Optional<SimilarImageStrategy> openDuplicationWindow(File srcFile, List<File> duplications) {
@@ -163,6 +162,19 @@ public class MainController implements Initializable {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private void showFailedMessageToSaveImage(Exception ex) {
+        Alert error = new Alert(AlertType.ERROR);
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        TextArea textArea = new TextArea(sw.toString());
+
+        error.getDialogPane().setExpandableContent(textArea);
+        error.setContentText("ファイル保存中にエラーが発生しました。");
+        error.show();
     }
     
     @FXML
