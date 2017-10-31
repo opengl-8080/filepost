@@ -1,19 +1,10 @@
 package gl8080.filepost.domain;
 
-import net.semanticmetadata.lire.builders.DocumentBuilder;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.FSDirectory;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -21,13 +12,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * 保存先フォルダ
  */
 public class DestinationFolder {
-    
     private File destDir;
     private String name;
     
@@ -40,6 +31,21 @@ public class DestinationFolder {
         this(destDir, destDir.getName());
     }
 
+    public List<File> collectAllImages() throws IOException {
+        return Files.list(this.destDir.toPath())
+                .filter(this::isImageFile)
+                .map(Path::toFile)
+                .collect(Collectors.toList());
+    }
+
+    public List<File> collectAllImages(Predicate<Path> filter) throws IOException {
+        return Files.list(this.destDir.toPath())
+                .filter(this::isImageFile)
+                .filter(filter)
+                .map(Path::toFile)
+                .collect(Collectors.toList());
+    }
+
     public String getName() {
         return this.name;
     }
@@ -50,55 +56,6 @@ public class DestinationFolder {
     
     public String getDestPath() {
         return this.destDir.getAbsolutePath();
-    }
-
-    public NoIndexedImages findNoIndexedImages() {
-        try {
-            List<File> images = this.existsIndexDirectory() ? this._findNoIndexedImages() : this.collectAllImages();
-            return new NoIndexedImages(this.indexDirPath(), images);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private boolean existsIndexDirectory() {
-        Path indexDir = Paths.get(this.indexDirPath());
-        return Files.exists(indexDir);
-    }
-
-    private List<File> _findNoIndexedImages() throws IOException {
-        Path indexDir = Paths.get(this.indexDirPath());
-
-        try (DirectoryReader reader = DirectoryReader.open(FSDirectory.open(indexDir))) {
-            IndexSearcher indexSearcher = new IndexSearcher(reader);
-
-            return Files.list(this.destDir.toPath())
-                    .filter(this::isImageFile)
-                    .filter(image -> this.notExistsIndex(image, indexSearcher))
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());
-        }
-    }
-
-    private boolean notExistsIndex(Path image, IndexSearcher indexSearcher) {
-        TermQuery query = new TermQuery(new Term(DocumentBuilder.FIELD_NAME_IDENTIFIER, image.toString()));
-        try {
-            TopDocs topDocs = indexSearcher.search(query, 1);
-            return topDocs.totalHits == 0;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private List<File> collectAllImages() throws IOException {
-        return Files.list(this.destDir.toPath())
-                .filter(this::isImageFile)
-                .map(Path::toFile)
-                .collect(Collectors.toList());
-    }
-    
-    private String indexDirPath() {
-        return "./indexes/" + this.name;
     }
 
 

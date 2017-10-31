@@ -1,7 +1,7 @@
 package gl8080.filepost.view;
 
-import gl8080.filepost.domain.IndexCreator;
-import gl8080.filepost.domain.NoIndexedImages;
+import gl8080.filepost.infrastructure.similar.IndexCreator;
+import gl8080.filepost.infrastructure.similar.NoIndexedImages;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressBar;
@@ -14,26 +14,26 @@ public class IndexingController {
     @FXML
     private ProgressBar progressBar;
     
-    private Runnable listener;
+    private Runnable finishedListener;
 
     void setNoIndexedImages(NoIndexedImages noIndexedImages) {
         this.noIndexedImages = noIndexedImages;
     }
 
+    void onFinished(Runnable finishedListener) {
+        this.finishedListener = finishedListener;
+    }
+    
     void start() {
-        IndexCreator indexCreator = new IndexCreator(progress -> {
-            Platform.runLater(() -> {
-                this.progressBar.setProgress(progress);
-            });
-        });
+        IndexCreator indexCreator = new IndexCreator(this::updateProgressBar);
         
         Executors.newSingleThreadExecutor().execute(() -> {
             indexCreator.createIndex(this.noIndexedImages);
-            this.listener.run();
+            this.finishedListener.run();
         });
     }
     
-    void onFinished(Runnable listener) {
-        this.listener = listener;
+    private void updateProgressBar(double progress) {
+        Platform.runLater(() -> this.progressBar.setProgress(progress));
     }
 }

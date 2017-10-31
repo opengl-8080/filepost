@@ -2,9 +2,10 @@ package gl8080.filepost.view;
 
 import gl8080.filepost.domain.DestinationFolder;
 import gl8080.filepost.domain.DestinationFolderRepository;
-import gl8080.filepost.domain.NoIndexedImages;
 import gl8080.filepost.domain.SimilarImageStrategy;
 import gl8080.filepost.infrastructure.DestinationFolderRepositoryImpl;
+import gl8080.filepost.infrastructure.similar.IndexedSimilarImageFinder;
+import gl8080.filepost.infrastructure.similar.NoIndexedImages;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -94,7 +95,9 @@ public class MainController implements Initializable {
             DestinationFolder destinationFolder = item.folder;
 
             try {
-                NoIndexedImages noIndexedImages = destinationFolder.findNoIndexedImages();
+                IndexedSimilarImageFinder finder = new IndexedSimilarImageFinder(destinationFolder);
+                
+                NoIndexedImages noIndexedImages = finder.findNoIndexedImages();
                 if (noIndexedImages.isNotEmpty()) {
                     this.showIndexingDialog(noIndexedImages);
                 }

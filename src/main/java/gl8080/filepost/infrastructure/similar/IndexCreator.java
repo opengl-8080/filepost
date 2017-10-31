@@ -1,4 +1,4 @@
-package gl8080.filepost.domain;
+package gl8080.filepost.infrastructure.similar;
 
 import net.semanticmetadata.lire.builders.GlobalDocumentBuilder;
 import net.semanticmetadata.lire.imageanalysis.features.global.CEDD;
@@ -11,31 +11,35 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.function.Consumer;
 
 public class IndexCreator {
     
-    private final Consumer<Double> listener;
+    private final ProgressListener progressListener;
 
-    public IndexCreator(Consumer<Double> listener) {
-        this.listener = listener;
+    public IndexCreator(ProgressListener progressListener) {
+        this.progressListener = progressListener;
     }
 
     public void createIndex(NoIndexedImages noIndexedImages) {
         GlobalDocumentBuilder globalDocumentBuilder = new GlobalDocumentBuilder(CEDD.class);
 
-        try (IndexWriter writer = LuceneUtils.createIndexWriter(noIndexedImages.indexDirPath, false, LuceneUtils.AnalyzerType.WhitespaceAnalyzer)) {
+        try (IndexWriter writer = LuceneUtils.createIndexWriter(noIndexedImages.getIndexDirPath(), false, LuceneUtils.AnalyzerType.WhitespaceAnalyzer)) {
             int i=0;
             int total = noIndexedImages.count();
-            for (File image : noIndexedImages.images) {
+            for (File image : noIndexedImages.getImages()) {
                 BufferedImage bufferedImage = ImageIO.read(image);
                 Document document = globalDocumentBuilder.createDocument(bufferedImage, image.toString());
                 writer.addDocument(document);
                 i++;
-                this.listener.accept((double)i/(double)total);
+                this.progressListener.report((double)i/(double)total);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+    
+    @FunctionalInterface
+    public interface ProgressListener {
+        void report(double progress);
     }
 }
