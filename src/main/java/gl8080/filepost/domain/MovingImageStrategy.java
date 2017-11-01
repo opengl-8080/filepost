@@ -1,6 +1,6 @@
 package gl8080.filepost.domain;
 
-public enum SimilarImageStrategy {
+public enum MovingImageStrategy {
     MOVE,
     SKIP,
     REMOVE,

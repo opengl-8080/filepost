@@ -69,17 +69,27 @@ public class DestinationFolder {
         String name = path.getFileName().toString().toLowerCase();
         return IMAGE_FILE_EXTENSIONS.stream().anyMatch(name::endsWith);
     }
+    
+    void moveInto(Path file) {
+        try {
+            String fileName = file.getFileName().toString();
+            File dest = new File(this.destDir, fileName);
+            Files.move(file, dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 
-    public int moveInto(LinkedHashSet<File> files, BiFunction<File, List<File>, Optional<SimilarImageStrategy>> similarImageListener) {
+    public int moveInto(LinkedHashSet<File> files, BiFunction<File, List<File>, Optional<MovingImageStrategy>> similarImageListener) {
         AtomicInteger movedCount = new AtomicInteger(0);
         
         files.forEach(src -> {
             try {
-                SimilarImageStrategy strategy = this.decideStrategy(src, similarImageListener);
+                MovingImageStrategy strategy = this.decideStrategy(src, similarImageListener);
                 
-                if (strategy == SimilarImageStrategy.SKIP) {
+                if (strategy == MovingImageStrategy.SKIP) {
                     return;
-                } else if (strategy == SimilarImageStrategy.REMOVE) {
+                } else if (strategy == MovingImageStrategy.REMOVE) {
                     Files.delete(src.toPath());
                     return;
                 }
@@ -94,21 +104,21 @@ public class DestinationFolder {
         return movedCount.get();
     }
 
-    private SimilarImageStrategy decideStrategy(File src, BiFunction<File, List<File>, Optional<SimilarImageStrategy>> similarImageListener) throws IOException {
+    private MovingImageStrategy decideStrategy(File src, BiFunction<File, List<File>, Optional<MovingImageStrategy>> similarImageListener) throws IOException {
         if (this.doesNotHaveImageFiles()) {
-            return SimilarImageStrategy.MOVE;
+            return MovingImageStrategy.MOVE;
         }
 
         List<File> similarImages = new SimilarImageFinder().findSimilarImages(src, this.name);
 
         if (!similarImages.isEmpty()) {
-            return similarImageListener.apply(src, similarImages).orElse(SimilarImageStrategy.SKIP);
+            return similarImageListener.apply(src, similarImages).orElse(MovingImageStrategy.SKIP);
         }
         
-        return SimilarImageStrategy.MOVE;
+        return MovingImageStrategy.MOVE;
     }
     
-    private boolean doesNotHaveImageFiles() throws IOException {
+    boolean doesNotHaveImageFiles() throws IOException {
         return Files.list(this.destDir.toPath()).filter(this::isImageFile).count() == 0;
     }
 }

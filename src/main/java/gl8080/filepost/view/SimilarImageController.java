@@ -1,6 +1,6 @@
 package gl8080.filepost.view;
 
-import gl8080.filepost.domain.SimilarImageStrategy;
+import gl8080.filepost.domain.MovingImageStrategy;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -13,7 +13,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Optional;
 
 public class SimilarImageController {
     
@@ -21,7 +20,7 @@ public class SimilarImageController {
     
     private List<File> similarImages;
     private int similarImagesIndex = 0;
-    private SimilarImageStrategy similarImageStrategy;
+    private MovingImageStrategy movingImageStrategy;
     
     @FXML
     private ImageView srcImageView;
@@ -98,13 +97,13 @@ public class SimilarImageController {
     
     @FXML
     public void onClickMoveButton() {
-        this.similarImageStrategy = SimilarImageStrategy.MOVE;
+        this.movingImageStrategy = MovingImageStrategy.MOVE;
         this.stage.close();
     }
     
     @FXML
     public void onClickSkipButton() {
-        this.similarImageStrategy = SimilarImageStrategy.SKIP;
+        this.movingImageStrategy = MovingImageStrategy.SKIP;
         this.stage.close();
     }
     
@@ -121,12 +120,12 @@ public class SimilarImageController {
         ButtonType buttonType = alert.showAndWait().orElse(ButtonType.NO);
         
         if (ButtonType.OK.equals(buttonType)) {
-            this.similarImageStrategy = SimilarImageStrategy.REMOVE;
+            this.movingImageStrategy = MovingImageStrategy.REMOVE;
             this.stage.close();
         }
     }
-    
-    Optional<SimilarImageStrategy> getSimilarImageStrategy() {
-        return Optional.ofNullable(this.similarImageStrategy);
+
+    MovingImageStrategy getMovingImageStrategy() {
+        return this.movingImageStrategy == null ? MovingImageStrategy.SKIP : this.movingImageStrategy;
     }
 }

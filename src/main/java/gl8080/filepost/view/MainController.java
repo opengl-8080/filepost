@@ -2,7 +2,8 @@ package gl8080.filepost.view;
 
 import gl8080.filepost.domain.DestinationFolder;
 import gl8080.filepost.domain.DestinationFolderRepository;
-import gl8080.filepost.domain.SimilarImageStrategy;
+import gl8080.filepost.domain.MoveTargetImages;
+import gl8080.filepost.domain.MovingImageStrategy;
 import gl8080.filepost.infrastructure.DestinationFolderRepositoryImpl;
 import gl8080.filepost.infrastructure.similar.IndexedSimilarImageFinder;
 import gl8080.filepost.infrastructure.similar.NoIndexedImages;
@@ -38,9 +39,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
@@ -55,7 +54,7 @@ public class MainController implements Initializable {
     @FXML
     private ListView<ListItem> destDirectoryListView;
     
-    private LinkedHashSet<File> targetFiles;
+    private MoveTargetImages moveTargetImages = new MoveTargetImages(this::openDuplicationWindow);
     private List<DestinationFolder> destinationFolders;
     
     private DestinationFolderRepository repository = new DestinationFolderRepositoryImpl();
@@ -69,14 +68,14 @@ public class MainController implements Initializable {
     
     @FXML
     public void selectDestFolderByMouse(MouseEvent e) {
-        if (!this.targetFiles.isEmpty() && this.isDoubleClick(e)) {
+        if (this.moveTargetImages.isNotEmpty() && this.isDoubleClick(e)) {
             this.selectDestFolder();
         }
     }
     
     @FXML
     public void selectDestFolderByKeyboad(KeyEvent e) {
-        if (!this.targetFiles.isEmpty() && (" ".equals(e.getCharacter()) || "\r".equals(e.getCharacter()))) {
+        if (this.moveTargetImages.isNotEmpty() && (" ".equals(e.getCharacter()) || "\r".equals(e.getCharacter()))) {
             this.selectDestFolder();
         }
     }
@@ -102,7 +101,7 @@ public class MainController implements Initializable {
                     this.showIndexingDialog(noIndexedImages);
                 }
 
-                int movedCount = destinationFolder.moveInto(this.targetFiles, this::openDuplicationWindow);
+                int movedCount = this.moveTargetImages.moveTo(destinationFolder, finder);
                 
                 this.showCompletedDialog(movedCount, destinationFolder);
                 
@@ -142,7 +141,7 @@ public class MainController implements Initializable {
         stage.showAndWait();
     }
     
-    private Optional<SimilarImageStrategy> openDuplicationWindow(File srcFile, List<File> duplications) {
+    private MovingImageStrategy openDuplicationWindow(File movingTargetImage, List<File> similarImages) {
         try {
             FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/duplication.fxml"));
             Parent root = loader.load();
@@ -157,11 +156,11 @@ public class MainController implements Initializable {
             stage.setTitle("重複ファイル");
             stage.setMaximized(true);
             
-            controller.init(stage, srcFile, duplications);
+            controller.init(stage, movingTargetImage, similarImages);
 
             stage.showAndWait();
             
-            return controller.getSimilarImageStrategy();
+            return controller.getMovingImageStrategy();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -218,13 +217,8 @@ public class MainController implements Initializable {
     public void onDragDroppedFile(DragEvent event) {
         Dragboard dragboard = event.getDragboard();
         
-        if (this.targetFiles.isEmpty()) {
-            this.targetFiles = new LinkedHashSet<>(dragboard.getFiles());
-        } else {
-            this.targetFiles.addAll(dragboard.getFiles());
-        }
-        
-        this.targetFilesLabel.setText(this.targetFiles.size() + " 件選択されています");
+        this.moveTargetImages.add(dragboard.getFiles());
+        this.targetFilesLabel.setText(this.moveTargetImages.size() + " 件選択されています");
         this.filterTextField.setDisable(false);
         this.filterTextField.requestFocus();
         
@@ -234,7 +228,7 @@ public class MainController implements Initializable {
     
     @FXML
     public void clear() {
-        this.targetFiles = new LinkedHashSet<>();
+        this.moveTargetImages.clear();
         this.targetFilesLabel.setText("ここにファイルをドロップ");
         this.filterTextField.setDisable(true);
     }
