@@ -4,6 +4,7 @@ import gl8080.filepost.domain.DestinationFolder;
 import gl8080.filepost.domain.DestinationFolderRepository;
 import gl8080.filepost.domain.MoveTargetImages;
 import gl8080.filepost.domain.MovingImageStrategy;
+import gl8080.filepost.domain.MovingImageStrategyDecider;
 import gl8080.filepost.infrastructure.DestinationFolderRepositoryImpl;
 import gl8080.filepost.infrastructure.similar.IndexedSimilarImageFinder;
 import gl8080.filepost.infrastructure.similar.NoIndexedImages;
@@ -54,7 +55,7 @@ public class MainController implements Initializable {
     @FXML
     private ListView<ListItem> destDirectoryListView;
     
-    private MoveTargetImages moveTargetImages = new MoveTargetImages(this::openDuplicationWindow);
+    private MoveTargetImages moveTargetImages = new MoveTargetImages();
     private List<DestinationFolder> destinationFolders;
     
     private DestinationFolderRepository repository = new DestinationFolderRepositoryImpl();
@@ -101,7 +102,13 @@ public class MainController implements Initializable {
                     this.showIndexingDialog(noIndexedImages);
                 }
 
-                int movedCount = this.moveTargetImages.moveTo(destinationFolder, finder);
+                MovingImageStrategyDecider decider = new MovingImageStrategyDecider(
+                    destinationFolder,
+                    finder,
+                    this::openDuplicationWindow
+                );
+
+                int movedCount = this.moveTargetImages.moveTo(destinationFolder, decider);
                 
                 this.showCompletedDialog(movedCount, destinationFolder);
                 

@@ -11,12 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MoveTargetImages {
-    private final MovingImageStrategyDecider strategyDecider;
     private Set<Path> files = new HashSet<>();
-
-    public MoveTargetImages(MovingImageStrategyDecider strategyDecider) {
-        this.strategyDecider = strategyDecider;
-    }
 
     public boolean isNotEmpty() {
         return !this.files.isEmpty();
@@ -34,12 +29,12 @@ public class MoveTargetImages {
         this.files = new HashSet<>();
     }
 
-    public int moveTo(DestinationFolder destinationFolder, SimilarImageFinder similarImageFinder) {
+    public int moveTo(DestinationFolder destinationFolder, MovingImageStrategyDecider strategyDecider) {
         int movedCount = 0;
 
         try {
             for (Path movingTargetImage : this.files) {
-                MovingImageStrategy strategy = this.decideStrategy(movingTargetImage.toFile(), destinationFolder, similarImageFinder);
+                MovingImageStrategy strategy = strategyDecider.decide(movingTargetImage.toFile());
                 
                 if (strategy == MovingImageStrategy.MOVE) {
                     destinationFolder.moveInto(movingTargetImage);
@@ -54,19 +49,5 @@ public class MoveTargetImages {
         }
         
         return movedCount;
-    }
-    
-    private MovingImageStrategy decideStrategy(File movingTargetImage, DestinationFolder destinationFolder, SimilarImageFinder similarImageFinder) throws IOException {
-        if (destinationFolder.doesNotHaveImageFiles()) {
-            return MovingImageStrategy.MOVE;
-        }
-
-        List<File> similarImages = similarImageFinder.findSimilarImages(movingTargetImage);
-
-        if (!similarImages.isEmpty()) {
-            return this.strategyDecider.decideStrategy(movingTargetImage, similarImages);
-        }
-
-        return MovingImageStrategy.MOVE;
     }
 }

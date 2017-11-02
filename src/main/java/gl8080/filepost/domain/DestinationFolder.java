@@ -7,11 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -79,46 +75,12 @@ public class DestinationFolder {
             throw new UncheckedIOException(e);
         }
     }
-
-    public int moveInto(LinkedHashSet<File> files, BiFunction<File, List<File>, Optional<MovingImageStrategy>> similarImageListener) {
-        AtomicInteger movedCount = new AtomicInteger(0);
-        
-        files.forEach(src -> {
-            try {
-                MovingImageStrategy strategy = this.decideStrategy(src, similarImageListener);
-                
-                if (strategy == MovingImageStrategy.SKIP) {
-                    return;
-                } else if (strategy == MovingImageStrategy.REMOVE) {
-                    Files.delete(src.toPath());
-                    return;
-                }
-                
-                File dest = new File(this.destDir, src.getName());
-                Files.move(src.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
-                movedCount.incrementAndGet();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
-        return movedCount.get();
-    }
-
-    private MovingImageStrategy decideStrategy(File src, BiFunction<File, List<File>, Optional<MovingImageStrategy>> similarImageListener) throws IOException {
-        if (this.doesNotHaveImageFiles()) {
-            return MovingImageStrategy.MOVE;
-        }
-
-        List<File> similarImages = new SimilarImageFinder().findSimilarImages(src, this.name);
-
-        if (!similarImages.isEmpty()) {
-            return similarImageListener.apply(src, similarImages).orElse(MovingImageStrategy.SKIP);
-        }
-        
-        return MovingImageStrategy.MOVE;
-    }
     
-    boolean doesNotHaveImageFiles() throws IOException {
-        return Files.list(this.destDir.toPath()).filter(this::isImageFile).count() == 0;
+    boolean doesNotHaveImageFiles() {
+        try {
+            return Files.list(this.destDir.toPath()).filter(this::isImageFile).count() == 0;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }
