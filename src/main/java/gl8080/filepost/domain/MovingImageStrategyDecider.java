@@ -4,27 +4,25 @@ import java.io.File;
 import java.util.List;
 
 public class MovingImageStrategyDecider {
-    private final DestinationFolder destinationFolder;
     private final SimilarImageFinder similarImageFinder;
     private final SimilarImageMovingStrategyDecider similarImageMovingStrategyDecider;
 
-    public MovingImageStrategyDecider(DestinationFolder destinationFolder, SimilarImageFinder similarImageFinder, SimilarImageMovingStrategyDecider similarImageMovingStrategyDecider) {
-        this.destinationFolder = destinationFolder;
+    public MovingImageStrategyDecider(SimilarImageFinder similarImageFinder, SimilarImageMovingStrategyDecider similarImageMovingStrategyDecider) {
         this.similarImageFinder = similarImageFinder;
         this.similarImageMovingStrategyDecider = similarImageMovingStrategyDecider;
     }
 
-    MovingImageStrategy decide(File movingTargetImage) {
-        if (this.destinationFolder.doesNotHaveImageFiles()) {
+    MovingImageStrategy decide(DestinationFolder destinationFolder, File movingTargetImage) {
+        if (destinationFolder.doesNotHaveImageFiles()) {
             return MovingImageStrategy.MOVE;
         }
 
-        List<File> similarImages = this.similarImageFinder.findSimilarImages(movingTargetImage);
+        List<File> similarImages = this.similarImageFinder.findSimilarImages(destinationFolder, movingTargetImage);
 
-        if (!similarImages.isEmpty()) {
-            return this.similarImageMovingStrategyDecider.decide(movingTargetImage, similarImages);
+        if (similarImages.isEmpty()) {
+            return MovingImageStrategy.MOVE;
         }
 
-        return MovingImageStrategy.MOVE;
+        return this.similarImageMovingStrategyDecider.decide(movingTargetImage, similarImages);
     }
 }

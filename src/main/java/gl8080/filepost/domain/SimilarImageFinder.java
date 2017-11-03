@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface SimilarImageFinder {
 
-    List<File> findSimilarImages(File targetImageFile);
+    List<File> findSimilarImages(DestinationFolder destinationFolder, File targetImageFile);
 }

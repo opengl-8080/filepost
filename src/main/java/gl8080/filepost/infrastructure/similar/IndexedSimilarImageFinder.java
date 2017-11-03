@@ -33,8 +33,8 @@ public class IndexedSimilarImageFinder implements SimilarImageFinder {
     }
 
     @Override
-    public List<File> findSimilarImages(File targetImageFile) {
-        try (DirectoryReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(this.indexDirPath())))) {
+    public List<File> findSimilarImages(DestinationFolder destinationFolder, File targetImageFile) {
+        try (DirectoryReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(this.indexDirPath(destinationFolder))))) {
             GenericFastImageSearcher searcher = new GenericFastImageSearcher(5, CEDD.class);
             BufferedImage image = ImageIO.read(targetImageFile);
             ImageSearchHits hits = searcher.search(image, reader);
@@ -77,7 +77,7 @@ public class IndexedSimilarImageFinder implements SimilarImageFinder {
 
         try (DirectoryReader reader = DirectoryReader.open(FSDirectory.open(indexDir))) {
             IndexSearcher indexSearcher = new IndexSearcher(reader);
-            return this.folder.collectAllImages(image -> this.notExistsIndex(image, indexSearcher));
+            return this.folder.collectImages(image -> this.notExistsIndex(image, indexSearcher));
         }
     }
 
@@ -92,6 +92,10 @@ public class IndexedSimilarImageFinder implements SimilarImageFinder {
     }
 
     private String indexDirPath() {
-        return "./indexes/" + this.folder.getName();
+        return this.indexDirPath(this.folder);
+    }
+
+    private String indexDirPath(DestinationFolder destinationFolder) {
+        return "./indexes/" + destinationFolder.getName();
     }
 }

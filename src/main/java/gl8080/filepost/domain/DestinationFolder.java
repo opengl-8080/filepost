@@ -34,7 +34,7 @@ public class DestinationFolder {
                 .collect(Collectors.toList());
     }
 
-    public List<File> collectAllImages(Predicate<Path> filter) throws IOException {
+    public List<File> collectImages(Predicate<Path> filter) throws IOException {
         return Files.list(this.destDir.toPath())
                 .filter(this::isImageFile)
                 .filter(filter)
@@ -54,7 +54,6 @@ public class DestinationFolder {
         return this.destDir.getAbsolutePath();
     }
 
-
     private static final List<String> IMAGE_FILE_EXTENSIONS = Arrays.asList(".jpg", ".jpeg", ".png", ".gif");
 
     private boolean isImageFile(Path path) {
@@ -66,11 +65,11 @@ public class DestinationFolder {
         return IMAGE_FILE_EXTENSIONS.stream().anyMatch(name::endsWith);
     }
     
-    void moveInto(Path file) {
+    void moveInto(File file) {
         try {
-            String fileName = file.getFileName().toString();
+            String fileName = file.getName();
             File dest = new File(this.destDir, fileName);
-            Files.move(file, dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
+            Files.move(file.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

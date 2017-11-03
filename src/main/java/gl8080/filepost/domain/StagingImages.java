@@ -4,21 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-public class MoveTargetImages {
-    private Set<Path> files = new HashSet<>();
+public class StagingImages {
+    private Set<File> files = new HashSet<>();
 
     public boolean isNotEmpty() {
         return !this.files.isEmpty();
     }
 
     public void add(List<File> files) {
-        this.files.addAll(files.stream().map(File::toPath).collect(Collectors.toSet()));
+        this.files.addAll(files);
     }
     
     public int size() {
@@ -33,14 +31,14 @@ public class MoveTargetImages {
         int movedCount = 0;
 
         try {
-            for (Path movingTargetImage : this.files) {
-                MovingImageStrategy strategy = strategyDecider.decide(movingTargetImage.toFile());
+            for (File movingTargetImage : this.files) {
+                MovingImageStrategy strategy = strategyDecider.decide(destinationFolder, movingTargetImage);
                 
                 if (strategy == MovingImageStrategy.MOVE) {
                     destinationFolder.moveInto(movingTargetImage);
                     movedCount++;
                 } else if (strategy == MovingImageStrategy.REMOVE) {
-                    Files.delete(movingTargetImage);
+                    Files.delete(movingTargetImage.toPath());
                 }
                 // skip
             }

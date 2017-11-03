@@ -2,7 +2,7 @@ package gl8080.filepost.view;
 
 import gl8080.filepost.domain.DestinationFolder;
 import gl8080.filepost.domain.DestinationFolderRepository;
-import gl8080.filepost.domain.MoveTargetImages;
+import gl8080.filepost.domain.StagingImages;
 import gl8080.filepost.domain.MovingImageStrategy;
 import gl8080.filepost.domain.MovingImageStrategyDecider;
 import gl8080.filepost.infrastructure.DestinationFolderRepositoryImpl;
@@ -55,7 +55,7 @@ public class MainController implements Initializable {
     @FXML
     private ListView<ListItem> destDirectoryListView;
     
-    private MoveTargetImages moveTargetImages = new MoveTargetImages();
+    private StagingImages stagingImages = new StagingImages();
     private List<DestinationFolder> destinationFolders;
     
     private DestinationFolderRepository repository = new DestinationFolderRepositoryImpl();
@@ -69,14 +69,14 @@ public class MainController implements Initializable {
     
     @FXML
     public void selectDestFolderByMouse(MouseEvent e) {
-        if (this.moveTargetImages.isNotEmpty() && this.isDoubleClick(e)) {
+        if (this.stagingImages.isNotEmpty() && this.isDoubleClick(e)) {
             this.selectDestFolder();
         }
     }
     
     @FXML
     public void selectDestFolderByKeyboad(KeyEvent e) {
-        if (this.moveTargetImages.isNotEmpty() && (" ".equals(e.getCharacter()) || "\r".equals(e.getCharacter()))) {
+        if (this.stagingImages.isNotEmpty() && (" ".equals(e.getCharacter()) || "\r".equals(e.getCharacter()))) {
             this.selectDestFolder();
         }
     }
@@ -103,12 +103,11 @@ public class MainController implements Initializable {
                 }
 
                 MovingImageStrategyDecider decider = new MovingImageStrategyDecider(
-                    destinationFolder,
                     finder,
                     this::openDuplicationWindow
                 );
 
-                int movedCount = this.moveTargetImages.moveTo(destinationFolder, decider);
+                int movedCount = this.stagingImages.moveTo(destinationFolder, decider);
                 
                 this.showCompletedDialog(movedCount, destinationFolder);
                 
@@ -224,8 +223,8 @@ public class MainController implements Initializable {
     public void onDragDroppedFile(DragEvent event) {
         Dragboard dragboard = event.getDragboard();
         
-        this.moveTargetImages.add(dragboard.getFiles());
-        this.targetFilesLabel.setText(this.moveTargetImages.size() + " 件選択されています");
+        this.stagingImages.add(dragboard.getFiles());
+        this.targetFilesLabel.setText(this.stagingImages.size() + " 件選択されています");
         this.filterTextField.setDisable(false);
         this.filterTextField.requestFocus();
         
@@ -235,7 +234,7 @@ public class MainController implements Initializable {
     
     @FXML
     public void clear() {
-        this.moveTargetImages.clear();
+        this.stagingImages.clear();
         this.targetFilesLabel.setText("ここにファイルをドロップ");
         this.filterTextField.setDisable(true);
     }
